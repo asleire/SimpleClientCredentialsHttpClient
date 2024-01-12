@@ -27,8 +27,7 @@ public class Tests
         var handler = new TestHandler();
         sc.AddSingleton<IClock>(clock);
 
-        sc.AddHttpClient("test")
-            .AddClientCredentialsAuthorization(_options)
+        sc.AddSimpleClientCredentialsHttpClient("test", _options)
             .AddHttpMessageHandler(() => handler);
         
         sc.AddSimpleClientCredentialsHttpClient("test", _options);
