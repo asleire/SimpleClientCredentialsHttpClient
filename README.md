@@ -17,15 +17,26 @@ The simplest setup is done using `IServiceCollection`.
 
 ```csharp
 // IServiceProvider services = ...; // Should be available somewhere in your Startup.cs or Program.cs
-services.AddSimpleClientCredentialsHttpClient("my-api-client", new SimpleOptions() {
-    TokenUrl = "https://login.my-company.com/connect/token", // TODO Fetch settings from config
-    ClientId = "my-client-id",
-    ClientSecret = "my-client-secret",
-    Scope = "my-api-scope",
-});
+services
+    .AddSimpleClientCredentialsHttpClient(nameof(MyApiClient), new SimpleOptions() { // This will apply an Authorization header to requests from HttpClient with name 'MyApiClient'
+        TokenUrl = "https://login.my-company.com/connect/token", // TODO Fetch settings from config
+        ClientId = "my-client-id",
+        ClientSecret = "my-client-secret",
+        Scope = "my-api-scope",
+    })
+    .ConfigureHttpClient(http => // Optionally apply further configuration to the HttpClient
+    {
+        http.BaseAddress = new Uri("https://api.my-company.com);
+    });
 
 // IHttpClientFactory httpClientFactory = ...; // Should be injected where you need to use the API Client
-var apiClient = httpClientFactory.CreateClient("my-api-client");
+var apiClient = httpClientFactory.CreateClient(nameof(MyApiClient));
 
-var apiResponse = await apiClient.GetAsync("https://api.my-company.com/sensitive-stuff");
+var apiResponse = await apiClient.GetAsync("/sensitive-stuff");
 ```
+
+### Token handling
+
+The acquired access token is cached in-memory and only renewed 1 minute before its expiration.
+
+If any error occurs during access token retrieval an exception will be thrown. This exception is cached for 5 seconds, after which the next request will retry fetching an access token.
