@@ -30,8 +30,6 @@ public class Tests
         sc.AddSimpleClientCredentialsHttpClient("test", _options)
             .AddHttpMessageHandler(() => handler);
         
-        sc.AddSimpleClientCredentialsHttpClient("test", _options);
-
         await using var sp = sc.BuildServiceProvider();
 
         var httpClient = sp
@@ -51,6 +49,31 @@ public class Tests
 
         Assert.That(token2, Is.EqualTo(token1));
         Assert.That(token3, Is.Not.EqualTo(token2));
+    }
+    
+    [Test]
+    public async Task TestTokenAccessor()
+    {
+        var sc = new ServiceCollection();
+        var clock = new MockClock();
+        var handler = new TestHandler();
+        sc.AddSingleton<IClock>(clock);
+
+        sc.AddSimpleClientCredentialsHttpClient("test", _options)
+            .AddHttpMessageHandler(() => handler);
+        
+        await using var sp = sc.BuildServiceProvider();
+
+        var httpClient = sp
+            .GetRequiredService<IHttpClientFactory>()
+            .CreateClient("test");
+        var tokenAccessor = sp.GetRequiredService<SimpleTokenAccessor>();
+
+        await httpClient.GetAsync("https://localhost");
+        var token1 = handler.LastToken;
+        var token2 = await tokenAccessor.GetAccessToken("test");
+
+        Assert.That(token2, Is.EqualTo(token1));
     }
     
     private class TestHandler : DelegatingHandler

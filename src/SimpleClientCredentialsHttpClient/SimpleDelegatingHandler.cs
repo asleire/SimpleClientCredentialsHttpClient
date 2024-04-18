@@ -11,6 +11,8 @@ internal class SimpleDelegatingHandler : DelegatingHandler
         _tokenHandler = tokenHandler;
     }
 
+    public SimpleTokenHandler TokenHandler => _tokenHandler;
+
     private async Task Process(HttpRequestMessage request)
     {
         if (request.Headers.Authorization != null)

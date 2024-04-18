@@ -40,3 +40,7 @@ var apiResponse = await apiClient.GetAsync("/sensitive-stuff");
 The acquired access token is cached in-memory and only renewed 1 minute before its expiration.
 
 If any error occurs during access token retrieval an exception will be thrown. This exception is cached for 5 seconds, after which the next request will retry fetching an access token.
+
+### Retrieving access token outside of HttpClient
+
+If for any reason you want to get an access token used by a named HttpClient you can inject the class `SimpleTokenAccessor` into your code. It is automatically registered when using any of the IServiceCollection extension methods. If you are only using IHttpClientBuilder extensions you may register `SimpleTokenAccessor` yourself.
