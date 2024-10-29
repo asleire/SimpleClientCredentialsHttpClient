@@ -13,23 +13,23 @@ internal class SimpleDelegatingHandler : DelegatingHandler
 
     public SimpleTokenHandler TokenHandler => _tokenHandler;
 
-    private async Task Process(HttpRequestMessage request)
+    private async Task Process(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         if (request.Headers.Authorization != null)
             throw new AuthorizationHeaderAlreadySetException();
-
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await _tokenHandler.GetToken());
+        
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", await _tokenHandler.GetToken(cancellationToken));
     }
     
     protected override HttpResponseMessage Send(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        Process(request).GetAwaiter().GetResult();
+        Process(request, cancellationToken).GetAwaiter().GetResult();
         return base.Send(request, cancellationToken);
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        await Process(request);
+        await Process(request, cancellationToken);
         return await base.SendAsync(request, cancellationToken);
     }
 }
