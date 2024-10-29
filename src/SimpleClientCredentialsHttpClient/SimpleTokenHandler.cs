@@ -21,16 +21,16 @@ internal class SimpleTokenHandler
         _clock = clock;
     }
 
-    public async ValueTask<string> GetToken()
+    public async ValueTask<string> GetToken(CancellationToken cancellationToken)
     {
-        await _tokenLock.WaitAsync();
+        await _tokenLock.WaitAsync(cancellationToken);
 
         try
         {
-            if (_clock.UtcNow > _nextRenewal || _nextToken == null)
+            if (_clock.UtcNow >= _nextRenewal || _nextToken == null)
                 _nextToken = RenewToken();
 
-            return await _nextToken;
+            return await _nextToken.WaitAsync(cancellationToken);
         }
         finally
         {
@@ -40,10 +40,10 @@ internal class SimpleTokenHandler
 
     private async Task<string> RenewToken()
     {
+        var timeoutSource = new CancellationTokenSource(_options.TokenTimeout);
         try
         {
             var httpClient = _httpClientFactory.CreateClient();
-
             var httpResponse = await httpClient.SendAsync(new HttpRequestMessage()
             {
                 Method = HttpMethod.Post,
@@ -55,12 +55,13 @@ internal class SimpleTokenHandler
                     ["client_secret"] = _options.ClientSecret,
                     ["scope"] = _options.Scope,
                 }),
-            });
+            }, HttpCompletionOption.ResponseContentRead, timeoutSource.Token);
 
             if (!httpResponse.IsSuccessStatusCode)
                 await ThrowHttpException(httpResponse);
 
-            var tokenResponse = await httpResponse.Content.ReadFromJsonAsync<TokenResponse>();
+            var tokenResponse =
+                await httpResponse.Content.ReadFromJsonAsync<TokenResponse>(cancellationToken: timeoutSource.Token);
 
             if (tokenResponse == null)
                 throw new NullTokenResponseException();
@@ -76,6 +77,12 @@ internal class SimpleTokenHandler
                            - TimeSpan.FromSeconds(60);
 
             return tokenResponse.AccessToken;
+        }
+        catch (OperationCanceledException ex) when (timeoutSource.IsCancellationRequested)
+        {
+            _nextRenewal = _clock.UtcNow;
+            throw new TokenErrorException(
+                "Token renewal timed out. Will retry on next request.", ex);
         }
         catch (Exception ex)
         {

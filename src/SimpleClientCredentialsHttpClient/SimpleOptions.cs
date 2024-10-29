@@ -21,4 +21,9 @@ public record SimpleOptions
     /// Scope
     /// </summary>
     public required string Scope { get; set; }
+
+    /// <summary>
+    /// Token requests will fail and be retried if they take longer than this.
+    /// </summary>
+    public TimeSpan TokenTimeout { get; set; } = TimeSpan.FromSeconds(5);
 }

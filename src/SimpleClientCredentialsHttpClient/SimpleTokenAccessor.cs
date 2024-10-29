@@ -16,7 +16,7 @@ public class SimpleTokenAccessor
         _httpClientFactory = httpClientFactory;
     }
 
-    public async ValueTask<string> GetAccessToken(string httpClientName)
+    public async ValueTask<string> GetAccessToken(string httpClientName, CancellationToken cancellationToken = default)
     {
         if (!_handlers.TryGetValue(httpClientName, out var handler))
         {
@@ -37,6 +37,6 @@ public class SimpleTokenAccessor
             handler = _handlers[httpClientName] = simpleDelegatingHandler.TokenHandler;
         }
 
-        return await handler.GetToken();
+        return await handler.GetToken(cancellationToken);
     }
 }
