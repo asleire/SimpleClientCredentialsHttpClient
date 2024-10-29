@@ -24,4 +24,6 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
+      env:
+        TEST_CREDENTIALS: ${{ secrets.TEST_CREDENTIALS }}
       run: dotnet test --no-build --verbosity normal SimpleClientCredentialsHttpClient.Test

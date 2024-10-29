@@ -1,37 +1,47 @@
 ﻿namespace SimpleClientCredentialsHttpClient;
 
-public class SimpleException : Exception
-{
-}
-
 public class TokenErrorException : Exception
 {
     public TokenErrorException(string? message, Exception? innerException) : base(message, innerException)
     {
     }
+    
+    public TokenErrorException(string? message) : base(message)
+    {
+    }
+    
+    public TokenErrorException() 
+    {
+    }
 }
 
-public class AuthorizationHeaderAlreadySetException : SimpleException
+public class AuthorizationHeaderAlreadySetException : TokenErrorException
 {
 }
 
-public class NonOkTokenResponseException : SimpleException
+public class NonOkTokenResponseException : TokenErrorException
 {
-    public required int StatusCode { get; set; }
+    public NonOkTokenResponseException(int statusCode, string? responseBody, Exception? responseBodyReadException) : base(FormatMessage(statusCode, responseBody, responseBodyReadException))
+    {
+    }
 
-    public required string? ResponseBody { get; set; }
-
-    public required Exception? ResponseBodyReadException { get; set; }
+    private static string FormatMessage(int statusCode, string? responseBody, Exception? responseBodyReadException)
+    {
+        var responseBodyString = responseBodyReadException != null
+            ? $"Error reading response body: {responseBodyReadException.Message}"
+            : (responseBody == null ? "Response body is empty." : $"Response body: {responseBody}");
+        return $"Received status code {statusCode} from token endpoint. {responseBodyString}";
+    }
 }
 
-public class NullTokenResponseException : SimpleException
+public class NullTokenResponseException : TokenErrorException
 {
 }
 
-public class EmptyTokenResponseAccessTokenException : SimpleException
+public class EmptyTokenResponseAccessTokenException : TokenErrorException
 {
 }
 
-public class EmptyTokenResponseExpiresInException : SimpleException
+public class EmptyTokenResponseExpiresInException : TokenErrorException
 {
 }

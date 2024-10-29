@@ -107,11 +107,6 @@ internal class SimpleTokenHandler
             responseBodyReadException = ex;
         }
 
-        throw new NonOkTokenResponseException()
-        {
-            StatusCode = (int)message.StatusCode,
-            ResponseBody = responseBody,
-            ResponseBodyReadException = responseBodyReadException,
-        };
+        throw new NonOkTokenResponseException((int)message.StatusCode, responseBody, responseBodyReadException);
     }
 }

@@ -10,7 +10,7 @@ public class Tests
     [SetUp]
     public void Setup()
     {
-        var options = File.ReadAllText("test_credentials.secret");
+        var options = Environment.GetEnvironmentVariable("TEST_CREDENTIALS");
 
         if (string.IsNullOrEmpty(options))
             throw new Exception("Options not set");

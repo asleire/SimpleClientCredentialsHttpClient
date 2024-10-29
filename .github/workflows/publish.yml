@@ -23,6 +23,8 @@ jobs:
     - name: Build
       run: dotnet build --no-restore -c Release /p:Version=1.9.${{github.run_number}}
     - name: Test
+      env:
+        TEST_CREDENTIALS: ${{ secrets.TEST_CREDENTIALS }}
       run: dotnet test --no-build -c Release SimpleClientCredentialsHttpClient.Test
     - name: Pack
       run: dotnet pack --no-build -c Release -o packages /p:Version=1.0.${{github.run_number}}  
