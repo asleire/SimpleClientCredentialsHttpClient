@@ -1,4 +1,6 @@
-﻿namespace SimpleClientCredentialsHttpClient;
+﻿using Microsoft.Extensions.Options;
+
+namespace SimpleClientCredentialsHttpClient;
 
 public record SimpleOptions
 {
@@ -26,4 +28,9 @@ public record SimpleOptions
     /// Token requests will fail and be retried if they take longer than this.
     /// </summary>
     public TimeSpan TokenTimeout { get; set; } = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// The name of the HttpClient to use when requesting a token. Defaults to the standard HttpClient.  
+    /// </summary>
+    public string HttpClientName { get; set; } = Options.DefaultName;
 }
