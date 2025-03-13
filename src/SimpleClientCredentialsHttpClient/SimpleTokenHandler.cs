@@ -43,7 +43,7 @@ internal class SimpleTokenHandler
         var timeoutSource = new CancellationTokenSource(_options.TokenTimeout);
         try
         {
-            var httpClient = _httpClientFactory.CreateClient();
+            var httpClient = _httpClientFactory.CreateClient(_options.HttpClientName);
             var httpResponse = await httpClient.SendAsync(new HttpRequestMessage()
             {
                 Method = HttpMethod.Post,
