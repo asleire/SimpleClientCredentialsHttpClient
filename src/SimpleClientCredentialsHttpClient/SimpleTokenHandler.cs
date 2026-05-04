@@ -49,7 +49,6 @@ internal class SimpleTokenHandler
             {
                 ["grant_type"] = "client_credentials",
                 ["client_id"] = _options.ClientId,
-                ["client_secret"] = _options.ClientSecret,
                 ["scope"] = _options.Scope,
             };
 
