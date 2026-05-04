@@ -43,18 +43,25 @@ internal class SimpleTokenHandler
         var timeoutSource = new CancellationTokenSource(_options.TokenTimeout);
         try
         {
+            var secretType = _options.SecretType ?? SimpleOptionsSecretType.SharedSecret;
+
+            var formContentDictionary = new Dictionary<string, string>()
+            {
+                ["grant_type"] = "client_credentials",
+                ["client_id"] = _options.ClientId,
+                ["client_secret"] = _options.ClientSecret,
+                ["scope"] = _options.Scope,
+            };
+
+            if (secretType == SimpleOptionsSecretType.SharedSecret)
+                formContentDictionary["client_secret"] = _options.ClientSecret;
+            
             var httpClient = _httpClientFactory.CreateClient(_options.HttpClientName);
             var httpResponse = await httpClient.SendAsync(new HttpRequestMessage()
             {
                 Method = HttpMethod.Post,
                 RequestUri = _options.TokenUrl,
-                Content = new FormUrlEncodedContent(new Dictionary<string, string>()
-                {
-                    ["grant_type"] = "client_credentials",
-                    ["client_id"] = _options.ClientId,
-                    ["client_secret"] = _options.ClientSecret,
-                    ["scope"] = _options.Scope,
-                }),
+                Content = new FormUrlEncodedContent(formContentDictionary),
             }, HttpCompletionOption.ResponseContentRead, timeoutSource.Token);
 
             if (!httpResponse.IsSuccessStatusCode)
