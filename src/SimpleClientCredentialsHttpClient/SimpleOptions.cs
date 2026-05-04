@@ -33,4 +33,24 @@ public record SimpleOptions
     /// The name of the HttpClient to use when requesting a token. Defaults to the standard HttpClient.  
     /// </summary>
     public string HttpClientName { get; set; } = Options.DefaultName;
+    
+    /// <summary>
+    /// Which secret type to use. Defaults to <see cref="SimpleOptionsSecretType.SharedSecret"/>
+    /// </summary>
+    public SimpleOptionsSecretType? SecretType { get; set; }
+}
+
+public enum SimpleOptionsSecretType
+{
+    /// <summary>
+    /// Will pass along <see cref="SimpleOptions.ClientSecret"/> as a `client_secret` form data property.
+    /// </summary>
+    SharedSecret = 0,
+    /// <summary>
+    /// Will not set a `client_secret` property in the token request.  
+    /// </summary>
+    /// <remarks>
+    /// Meant to be used in specialized cases, for instance if mTLS authentication is used within a service mesh.
+    /// </remarks>
+    None = 1,
 }
