@@ -34,6 +34,9 @@ public record SimpleOptions
     /// </summary>
     public string HttpClientName { get; set; } = Options.DefaultName;
     
+    /// <summary>
+    /// Which secret type to use. Defaults to <see cref="SimpleOptionsSecretType.SharedSecret"/>
+    /// </summary>
     public SimpleOptionsSecretType? SecretType { get; set; }
 }
 
